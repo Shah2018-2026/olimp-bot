@@ -12,7 +12,7 @@ SUMMA_X = 1260
 SUMMA_Y = 210
 STAVKA_X = 1215
 STAVKA_Y = 369
-OZHIDANIE = 10
+OZHIDANIE = 20
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 CHROMEDRIVER = r"C:\Users\User\Desktop\chromedriver.exe"
 
@@ -33,6 +33,16 @@ def get_session(driver):
         "referer": "https://old.olimpbet.kz/live/?slds=110"
     })
     return session
+
+def klik_summa():
+    for dy in [0, 5, 10, -5]:
+        pyautogui.click(SUMMA_X, SUMMA_Y + dy)
+        time.sleep(0.3)
+
+def klik_stavka():
+    for dy in [0, 5, 10, -5]:
+        pyautogui.click(STAVKA_X, STAVKA_Y + dy)
+        time.sleep(0.3)
 
 try:
     options = Options()
@@ -128,12 +138,11 @@ while True:
         subprocess.Popen([CHROME, "--new-tab", match_url])
         time.sleep(OZHIDANIE)
 
-        pyautogui.click(SUMMA_X, SUMMA_Y)
-        time.sleep(0.5)
+        klik_summa()
         pyautogui.hotkey('ctrl', 'a')
         pyautogui.typewrite(str(STAVKA), interval=0.1)
         time.sleep(0.5)
-        pyautogui.click(STAVKA_X, STAVKA_Y)
+        klik_stavka()
         time.sleep(1)
         print("STAVKA SDELANA:", STAVKA, "T")
         najdeno = True
