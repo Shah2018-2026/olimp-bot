@@ -50,7 +50,7 @@ while True:
         mid = m.get("id")
         if mid in stavki:
             continue
-        score = m.get("score" or {})
+        score = m.get("score") or {}
         s1 = int(score.get("score1", 0) or 0)
         s2 = int(score.get("score2", 0) or 0)
         if (s1 == 0 and s2 == 2) or (s1 == 2 and s2 == 0):
