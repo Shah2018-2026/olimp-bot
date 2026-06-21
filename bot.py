@@ -33,19 +33,22 @@ while True:
         break
 
     print("Poisk... Stavka:", tekushaya, "Proigryshi:", proigryshi)
-    
-    r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&sportId=110&kinds=GENERAL&page-size=50")
-    
+
+    r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100")
+
     if r.status_code != 200:
         print("Oshibka:", r.status_code)
         time.sleep(10)
         continue
-    
+
     data = r.json()
     events = data.get("items", [])
     
+    tennis = [m for m in events if str(m.get("sportId", "")) == "110"]
+    print("Tenis matchej:", len(tennis))
+
     najdeno = False
-    for m in events:
+    for m in tennis:
         mid = m.get("id")
         if mid in stavki:
             continue
@@ -58,13 +61,11 @@ while True:
             stavki.append(mid)
             najdeno = True
             break
-    
+
     if not najdeno:
         print("Net matchej 0:2")
-    
-    time.sleep(15)
 
-    
+    time.sleep(15)
           
 
 
