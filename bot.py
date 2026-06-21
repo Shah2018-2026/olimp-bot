@@ -1,13 +1,6 @@
 import requests
-from bs4 import BeautifulSoup
 import time
-import re
-
-session = requests.Session()
-session.headers.update({
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Cookie": "secured=1; OASPRD4=e292230b-bcf2-475f-a299-7e89b890eba7; BWPRD4=801060d1-4635-49a3-92f7-b6d03e3d6b7e"
-})
+import pyautogui
 
 STAVKA = 30
 MIN_KOEF = 1.8
@@ -16,6 +9,17 @@ SUMMA_X = 1260
 SUMMA_Y = 210
 STAVKA_X = 1215
 STAVKA_Y = 369
+
+COOKIE = "secured=1; OASPRD4=e292230b-bcf2-475f-a299-7e89b890eba7; BWPRD4=801060d1-4635-49a3-92f7-b6d03e3d6b7e; cf_clearance=g4HUNUT4PaXBEWa2hcr1Tri1dhgFbpRw5StL0Sa9hvI-1782020658-1.2.1.1-YRNF.eJdXsg8wdeh4MNw0FTIBNY1CxnlkfpI5Sva1E.3pB5brk_fuVKgDpgvPzoTB_9aNb9ZEeH5BpGPwJHJdj3.bhX4kCkZE59SN5TSxiQSOqnXIgJeAJfo84.qQ6QO2BO30nUJlZTKMswkJkP0c96fC.v4hBJkZUd7_8X5KbYbni6aJHHXlbeZ4bU070CTWBCRA2YdZZ9U7jyOtsyd87DiDyfYJd9j0u55774MxXxLkwT1KT3LMEYRoNNlCHIFGZ4aQOqPBfSZYOk1xe54NjyMvDWTZqd3W65sM_E476DS36vvw7XES0ww_F.EwaIftAk9tLOhgPwkgQzMEcj5ZQ"
+
+session = requests.Session()
+session.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+    "Cookie": COOKIE,
+    "accept": "application/json",
+    "x-platform": "web-desktop-classic",
+    "referer": "https://old.olimpbet.kz/live/?slds=110"
+})
 
 proigryshi = 0
 stavki = []
@@ -29,31 +33,40 @@ while True:
         break
 
     print("Poisk... Stavka:", tekushaya, "Proigryshi:", proigryshi)
-    r = session.get("https://old.olimpbet.kz/live/?slds=110")
-    soup = BeautifulSoup(r.text, "html.parser")
+    
+    r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&sportId=110&kinds=GENERAL&page-size=50")
+    
+    if r.status_code != 200:
+        print("Oshibka:", r.status_code)
+        time.sleep(10)
+        continue
+    
+    data = r.json()
+    events = data.get("items", [])
+    print("Matchej:", len(events))
     
     najdeno = False
-    for row in soup.find_all("tr"):
-        text = row.get_text(" ", strip=True)
-        if ("0:2" in text or "2:0" in text) and "сет" in text.lower():
-            link = row.find("a", href=True)
-            if link:
-                href = link["href"]
-                mid = href
-                if mid in stavki:
-                    continue
-                name = link.get_text(strip=True)
-                print("NAJDEN:", name, text[:80])
-                stavki.append(mid)
-                najdeno = True
-                break
-
+    for m in events:
+        mid = m.get("id")
+        if mid in stavki:
+            continue
+        score = m.get("score", {})
+        s1 = int(score.get("score1", 0) or 0)
+        s2 = int(score.get("score2", 0) or 0)
+        if (s1 == 0 and s2 == 2) or (s1 == 2 and s2 == 0):
+            name = m.get("name", "?")
+            print("NAJDEN:", name, s1, ":", s2)
+            stavki.append(mid)
+            najdeno = True
+            break
+    
     if not najdeno:
         print("Net matchej 0:2")
-
+    
     time.sleep(15)
 
-
+    
+          
 
 
 
