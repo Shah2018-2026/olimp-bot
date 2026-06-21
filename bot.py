@@ -1,8 +1,9 @@
-import requests
 import time
 import pyautogui
-import subprocess
-import browser_cookie3
+import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 
 STAVKA = 30
 MAX_RAZNICA = 3
@@ -12,18 +13,16 @@ STAVKA_X = 1215
 STAVKA_Y = 369
 OZHIDANIE = 7
 
+CHROMEDRIVER = r"C:\Users\User\Desktop\chromedriver.exe"
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 stavki = []
 
-def get_session():
+def get_session_from_driver(driver):
     session = requests.Session()
-    try:
-        cookies = browser_cookie3.chrome(domain_name='.olimpbet.kz')
-        session.cookies.update(cookies)
-        print("Kuki polucheny iz Chrome!")
-    except Exception as e:
-        print("Oshibka kuki:", e)
+    cookies = driver.get_cookies()
+    for c in cookies:
+        session.cookies.set(c['name'], c['value'])
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
         "accept": "application/json",
@@ -32,20 +31,29 @@ def get_session():
     })
     return session
 
-print("BOT ZAPUSHEN!")
-print("Otkroj Chrome s Olimpbet i vojdi v kabinet!")
-time.sleep(5)
+options = Options()
+options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+service = Service(CHROMEDRIVER)
+driver = webdriver.Chrome(service=service, options=options)
 
-session = get_session()
+print("BOT ZAPUSHEN!")
+print("Podklyuchilsya k Chrome!")
+
+session = get_session_from_driver(driver)
 
 while True:
     print("Poisk... Stavka:", STAVKA)
 
-    r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100")
+    try:
+        session = get_session_from_driver(driver)
+        r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100")
+    except Exception as e:
+        print("Oshibka:", e)
+        time.sleep(10)
+        continue
 
     if r.status_code != 200:
-        print("Oshibka:", r.status_code, "- obnovlyayu kuki...")
-        session = get_session()
+        print("Oshibka status:", r.status_code)
         time.sleep(10)
         continue
 
@@ -105,7 +113,7 @@ while True:
         print("U TEBYA", OZHIDANIE, "SEKUND - KLIKNI P1 ili P2!")
         stavki.append(mid)
 
-        subprocess.Popen([CHROME, match_url])
+        driver.execute_script("window.open('" + match_url + "');")
         time.sleep(OZHIDANIE)
 
         pyautogui.click(SUMMA_X, SUMMA_Y)
