@@ -43,7 +43,8 @@ while True:
     
     data = r.json()
     events = data.get("items", [])
-    print("Matchej:", len(events))
+    for m in events[:3]:
+    print(m.get("name"), m.get("sportId"))
     
     najdeno = False
     for m in events:
