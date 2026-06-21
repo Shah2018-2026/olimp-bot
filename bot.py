@@ -44,7 +44,7 @@ while True:
     data = r.json()
     events = data.get("items", [])
 
-    tennis = [m for m in events if m.get("tournament", {}) and m["tournament"].get("sportId") == 110]
+    tennis = [m for m in events if m.get("tournament") and str(m["tournament"].get("sportId","")) == "110"]
     print("Tenis matchej:", len(tennis))
 
     najdeno = False
