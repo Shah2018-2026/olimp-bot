@@ -77,6 +77,7 @@ while True:
         if (s1 == 0 and s2 == 2) or (s1 == 2 and s2 == 0):
             name = m.get("name", "?")
             print("NAJDEN:", name, score_str)
+            print("URL:", f"https://old.olimpbet.kz/live/events/?ids={mid}")
             stavki.append(mid)
             najdeno = True
             break
