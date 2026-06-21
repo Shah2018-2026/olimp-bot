@@ -1,6 +1,7 @@
 import requests
 import time
 import pyautogui
+import webbrowser
 
 STAVKA = 30
 MIN_KOEF = 1.8
@@ -26,10 +27,12 @@ stavki = []
 tekushaya = STAVKA
 
 print("BOT ZAPUSHEN!")
+print("Otkroj Chrome s Olimpbet i vojdi v kabinet!")
+time.sleep(5)
 
 while True:
     if proigryshi >= MAX_PROIGRYSH:
-        print("STOP!")
+        print("STOP! Limit proigryshej!")
         break
 
     print("Poisk... Stavka:", tekushaya, "Proigryshi:", proigryshi)
@@ -45,11 +48,6 @@ while True:
     events = data.get("items", [])
     tennis = [m for m in events if m.get("tournament") and str(m["tournament"].get("sportId","")) == "110"]
     print("Tenis matchej:", len(tennis))
-
-    if tennis:
-        m0 = tennis[0]
-        stats = m0.get("statistics") or []
-        print("Stats primo matcha:", stats[:3])
 
     najdeno = False
     for m in tennis:
@@ -76,9 +74,20 @@ while True:
 
         if (s1 == 0 and s2 == 2) or (s1 == 2 and s2 == 0):
             name = m.get("name", "?")
+            match_url = "https://old.olimpbet.kz/live/events/?ids=" + str(mid)
             print("NAJDEN:", name, score_str)
-            print("URL:", f"https://old.olimpbet.kz/live/events/?ids={mid}")
+            print("Otkryvayu:", match_url)
             stavki.append(mid)
+            webbrowser.open(match_url)
+            time.sleep(8)
+            pyautogui.click(SUMMA_X, SUMMA_Y)
+            time.sleep(1)
+            pyautogui.hotkey('ctrl', 'a')
+            pyautogui.typewrite(str(tekushaya), interval=0.1)
+            time.sleep(1)
+            pyautogui.click(STAVKA_X, STAVKA_Y)
+            time.sleep(2)
+            print("STAVKA SDELANA:", tekushaya, "T")
             najdeno = True
             break
 
