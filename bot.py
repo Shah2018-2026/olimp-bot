@@ -4,13 +4,13 @@ import pyautogui
 import subprocess
 
 STAVKA = 30
-MIN_KOEF = 1.8
 MAX_PROIGRYSH = 5
 SUMMA_X = 1260
 SUMMA_Y = 210
 STAVKA_X = 1215
 STAVKA_Y = 369
 MAX_RAZNICA = 3
+OZHIDANIE = 7
 
 COOKIE = "secured=1; OASPRD4=e292230b-bcf2-475f-a299-7e89b890eba7; BWPRD4=801060d1-4635-49a3-92f7-b6d03e3d6b7e"
 
@@ -25,20 +25,14 @@ session.headers.update({
     "referer": "https://old.olimpbet.kz/live/?slds=110"
 })
 
-proigryshi = 0
 stavki = []
-tekushaya = STAVKA
 
 print("BOT ZAPUSHEN!")
 print("Otkroj Chrome s Olimpbet i vojdi v kabinet!")
 time.sleep(5)
 
 while True:
-    if proigryshi >= MAX_PROIGRYSH:
-        print("STOP! Limit proigryshej!")
-        break
-
-    print("Poisk... Stavka:", tekushaya, "Proigryshi:", proigryshi)
+    print("Poisk... Stavka:", STAVKA)
 
     r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100")
 
@@ -91,7 +85,7 @@ while True:
                         t2 = int(tp[1].strip())
                         raznica = abs(t1 - t2)
                         if raznica > MAX_RAZNICA:
-                            print("Raznica bolshaya:", third, "- propuskaem")
+                            print("Raznica bolshaya:", third, "propuskaem")
                             continue
                         print("3-j set:", third, "raznica:", raznica)
                     except:
@@ -100,23 +94,20 @@ while True:
         name = m.get("name", "?")
         match_url = "https://old.olimpbet.kz/live/events/?ids=" + str(mid)
         print("NAJDEN:", name, score_str)
+        print("U TEBYA", OZHIDANIE, "SEKUND - KLIKNI P1 ili P2!")
         stavki.append(mid)
 
         subprocess.Popen([CHROME, match_url])
-        time.sleep(8)
-
-        print("=== KLIKNI NA P1 ili P2 v 3-m sete ===")
-        print("=== Kogda kupony poyavitsya - nazmi Enter ===")
-        input()
+        time.sleep(OZHIDANIE)
 
         pyautogui.click(SUMMA_X, SUMMA_Y)
-        time.sleep(1)
+        time.sleep(0.5)
         pyautogui.hotkey('ctrl', 'a')
-        pyautogui.typewrite(str(tekushaya), interval=0.1)
-        time.sleep(1)
+        pyautogui.typewrite(str(STAVKA), interval=0.1)
+        time.sleep(0.5)
         pyautogui.click(STAVKA_X, STAVKA_Y)
-        time.sleep(2)
-        print("STAVKA SDELANA:", tekushaya, "T")
+        time.sleep(1)
+        print("STAVKA SDELANA:", STAVKA, "T")
         najdeno = True
         break
 
