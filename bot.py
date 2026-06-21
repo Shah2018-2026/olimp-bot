@@ -12,7 +12,7 @@ SUMMA_X = 1260
 SUMMA_Y = 210
 STAVKA_X = 1215
 STAVKA_Y = 369
-OZHIDANIE = 7
+OZHIDANIE = 10
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 CHROMEDRIVER = r"C:\Users\User\Desktop\chromedriver.exe"
 
