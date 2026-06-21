@@ -14,11 +14,10 @@ STAVKA_Y = 369
 OZHIDANIE = 7
 
 CHROMEDRIVER = r"C:\Users\User\Desktop\chromedriver.exe"
-CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 stavki = []
 
-def get_session_from_driver(driver):
+def get_session(driver):
     session = requests.Session()
     cookies = driver.get_cookies()
     for c in cookies:
@@ -35,18 +34,13 @@ options = Options()
 options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
 service = Service(CHROMEDRIVER)
 driver = webdriver.Chrome(service=service, options=options)
-
-print("BOT ZAPUSHEN!")
-print("Podklyuchilsya k Chrome!")
-
-session = get_session_from_driver(driver)
+print("BOT ZAPUSHEN! Podklyuchilsya k Chrome!")
 
 while True:
     print("Poisk... Stavka:", STAVKA)
-
     try:
-        session = get_session_from_driver(driver)
-        r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100")
+        session = get_session(driver)
+        r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100&sport-ids=110")
     except Exception as e:
         print("Oshibka:", e)
         time.sleep(10)
@@ -59,11 +53,10 @@ while True:
 
     data = r.json()
     events = data.get("items", [])
-    tennis = [m for m in events if m.get("tournament") and str(m["tournament"].get("sportId","")) == "110"]
-    print("Tenis matchej:", len(tennis))
+    print("Tenis matchej:", len(events))
 
     najdeno = False
-    for m in tennis:
+    for m in events:
         mid = m.get("id")
         if mid in stavki:
             continue
