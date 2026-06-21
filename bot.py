@@ -43,9 +43,13 @@ while True:
 
     data = r.json()
     events = data.get("items", [])
-
     tennis = [m for m in events if m.get("tournament") and str(m["tournament"].get("sportId","")) == "110"]
     print("Tenis matchej:", len(tennis))
+
+    if tennis:
+        m0 = tennis[0]
+        stats = m0.get("statistics") or []
+        print("Stats primo matcha:", stats[:3])
 
     najdeno = False
     for m in tennis:
@@ -60,12 +64,15 @@ while True:
                 score_str = s.get("value", "")
                 break
 
-        if ":" not in score_str:
+        if not score_str or ":" not in score_str:
             continue
 
         parts = score_str.split(":")
-        s1 = int(parts[0].strip() or 0)
-        s2 = int(parts[1].strip() or 0)
+        try:
+            s1 = int(parts[0].strip())
+            s2 = int(parts[1].strip())
+        except:
+            continue
 
         if (s1 == 0 and s2 == 2) or (s1 == 2 and s2 == 0):
             name = m.get("name", "?")
@@ -77,4 +84,4 @@ while True:
     if not najdeno:
         print("Net matchej 0:2")
 
-    time.sleep(15)
+    time.sleep(30)
