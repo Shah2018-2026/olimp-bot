@@ -2,34 +2,41 @@ import requests
 import time
 import pyautogui
 import subprocess
+import browser_cookie3
 
 STAVKA = 30
-MAX_PROIGRYSH = 5
+MAX_RAZNICA = 3
 SUMMA_X = 1260
 SUMMA_Y = 210
 STAVKA_X = 1215
 STAVKA_Y = 369
-MAX_RAZNICA = 3
 OZHIDANIE = 7
-
-COOKIE = "secured=1; OASPRD4=e292230b-bcf2-475f-a299-7e89b890eba7; BWPRD4=801060d1-4635-49a3-92f7-b6d03e3d6b7e"
 
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
-session = requests.Session()
-session.headers.update({
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Cookie": COOKIE,
-    "accept": "application/json",
-    "x-platform": "web-desktop-classic",
-    "referer": "https://old.olimpbet.kz/live/?slds=110"
-})
-
 stavki = []
+
+def get_session():
+    session = requests.Session()
+    try:
+        cookies = browser_cookie3.chrome(domain_name='.olimpbet.kz')
+        session.cookies.update(cookies)
+        print("Kuki polucheny iz Chrome!")
+    except Exception as e:
+        print("Oshibka kuki:", e)
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+        "accept": "application/json",
+        "x-platform": "web-desktop-classic",
+        "referer": "https://old.olimpbet.kz/live/?slds=110"
+    })
+    return session
 
 print("BOT ZAPUSHEN!")
 print("Otkroj Chrome s Olimpbet i vojdi v kabinet!")
 time.sleep(5)
+
+session = get_session()
 
 while True:
     print("Poisk... Stavka:", STAVKA)
@@ -37,7 +44,8 @@ while True:
     r = session.get("https://old.olimpbet.kz/api/v2/events?locale=ru&include-subsports=true&statuses=OPEN&statuses=TRADING&live=true&kinds=GENERAL&page-size=100")
 
     if r.status_code != 200:
-        print("Oshibka:", r.status_code)
+        print("Oshibka:", r.status_code, "- obnovlyayu kuki...")
+        session = get_session()
         time.sleep(10)
         continue
 
